@@ -11,3 +11,6 @@ all:
 
       image_build_path_mariadb: "./requirements/mariadb"
       image_mariadb: "mariadb"
+
+      image_build_path_wordpress: "./requirements/wordpress"
+      image_wordpress: "wordpress"

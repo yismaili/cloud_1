@@ -52,3 +52,17 @@
         name: "localhost:5000/{{ image_mariadb }}"
         tag: "{{ image_tag }}"
         push: yes
+
+    - name: Build WordPress Docker image
+      docker_image:
+        path: "{{ image_build_path_wordpress }}"
+        name: "localhost:5000/{{ image_wordpress }}"
+        tag: "{{ image_tag }}"
+
+    - name: Push WordPress Docker image to registry
+      docker_image:
+        name: "localhost:5000/{{ image_wordpress }}"
+        tag: "{{ image_tag }}"
+        push: yes
+
+    
