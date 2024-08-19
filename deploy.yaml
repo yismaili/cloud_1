@@ -65,4 +65,14 @@
         tag: "{{ image_tag }}"
         push: yes
 
-    
+    - name: Build Nginx Docker image
+      docker_image:
+        path: "{{ image_build_path_nginx }}"
+        name: "localhost:5000/{{ image_nginx }}"
+        tag: "{{ image_tag }}"
+
+    - name: Push Nginx Docker image to registry
+      docker_image:
+        name: "localhost:5000/{{ image_nginx }}"
+        tag: "{{ image_tag }}"
+        push: yes
