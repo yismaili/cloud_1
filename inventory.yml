@@ -9,3 +9,5 @@ all:
       docker_password: "password"
       image_tag: "inceotion"
 
+      image_build_path_mariadb: "./requirements/mariadb"
+      image_mariadb: "mariadb"
