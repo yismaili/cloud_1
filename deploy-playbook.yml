@@ -76,3 +76,15 @@
         name: "localhost:5000/{{ image_nginx }}"
         tag: "{{ image_tag }}"
         push: yes
+
+     - name: Run docker-compose up
+      community.docker.docker_compose:
+        project_src: {{ docker-compose_path }}
+        state: present
+        restarted: yes
+
+    - name: Ensure Docker Compose is running
+      command: docker-compose ps
+      args:
+        chdir: {{ docker-compose_path }}
+      register: compose_ps

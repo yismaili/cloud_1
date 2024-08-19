@@ -8,6 +8,7 @@ all:
       docker_username: "yismaili"
       docker_password: "password"
       image_tag: "inceotion"
+      docker-compose_path: "./home/yismaili/cloud_1"
 
       image_build_path_mariadb: "./requirements/mariadb"
       image_mariadb: "mariadb"
