@@ -1,0 +1,34 @@
+- name: Configuration of the VM with Ansible
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Install required packages
+      become: yes
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+        update_cache: yes
+
+    - name: Configure Docker logging
+      become: yes
+      copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {4
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "100m"
+            }
+          }
+        mode: '0644'
+      notify: Restart Docker
+
+    - name: Add user to Docker group
+      become: yes
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes

@@ -1,6 +1,53 @@
-
 version: "3" 
-# volumes of drivers 
+# Run containers 
+services: 
+  mariadb:
+      container_name: mariadb
+      env_file:
+        - .env
+      ports:
+        - 3360:3306
+      # build: ./requirements/mariadb
+      image: localhost:5000/mariadb:inceotion
+      restart: always
+      volumes:
+        - db:/var/lib/mysql
+      networks:
+        - appnwrk
+
+  wordpress:
+      container_name: wordpress
+      env_file:
+        - .env
+      depends_on:
+        - mariadb
+      # build: ./requirements/wordpress
+      image: localhost:5000/wordpress:inceotion
+      restart: always
+      ports:
+        - 9000:9000
+      volumes:
+        - wp:/var/www/html
+      networks:
+        - appnwrk
+
+  nginx:
+      container_name: nginx
+      env_file:
+        - .env
+      # build: ./requirements/nginx
+      image: localhost:5000/nginx:inceotion
+      depends_on:
+        - wordpress
+      restart: always
+      ports: 
+       - 443:443
+      volumes:
+        - wp:/var/www/html
+      networks:
+        - appnwrk
+
+# Volumes for storing data 
 volumes:
   db:
     driver: local
@@ -14,112 +61,8 @@ volumes:
       type: none
       o: bind
       device: /home/yismaili/data/wordpress
-# networks of drivers
+
+# Network configuration
 networks:
   appnwrk:
     driver: bridge
-# run containers 
-services: 
-  mariadb:
-      container_name: mariadb
-      env_file:
-        - .env
-      ports:
-        - 3360:3360
-      build: ./requirements/mariadb
-      image: mariadb:inceotion
-      restart: always
-      volumes:
-        - db:/var/lib/mysql
-      networks:
-        - appnwrk
-  wordpress:
-      container_name: wordpress
-      env_file:
-        - .env
-      depends_on:
-        - mariadb
-      build: ./requirements/WordPress
-      image: wordpress:inceotion
-      restart: always
-      ports:
-        - 9000:9000
-      volumes:
-        - wp:/var/www/html
-      networks:
-        - appnwrk
-  nginx:
-      container_name: nginx
-      env_file:
-        - .env
-      build: ./requirements/nginx
-      image: nginx:inceotion
-      depends_on:
-        - wordpress
-      restart: always
-      ports: 
-       - 443:443
-      volumes:
-        - wp:/var/www/html
-      networks:
-        - appnwrk
-  adminer:
-    container_name: adminer
-    build:  ./requirements/bonus/Adminer
-    image: adminer:inceotion
-    depends_on:
-        - wordpress
-    restart: always
-    ports:
-      - "8282:8282"
-    networks:
-      - appnwrk
-  wibsete:
-    container_name: wibset
-    build:  ./requirements/bonus/website
-    image: wibset:inceotion
-    ports:
-      - 5000:80
-    networks:
-      - appnwrk
-  redis:
-    container_name: redis
-    build:  ./requirements/bonus/redis
-    image: redis:inceotion
-    depends_on:
-        - wordpress
-    ports: 
-       - 6379:6379
-    networks:
-      - appnwrk
-  ftp:
-    container_name: ftp
-    build:  ./requirements/bonus/ftp_server
-    image: ftp:inceotion
-    depends_on:
-        - wordpress
-    ports:
-      - "40000-40006:40000-40006"
-      - "21:21"
-      - "20:20"
-    networks:
-      - appnwrk
-    env_file:
-      - .env
-    volumes:
-      - wp:/home/vlm/ftp
-    restart: always
-  cadvisor:
-    container_name: cadvisor
-    build:  ./requirements/bonus/cAdvisor
-    image: cadvisor:inceotion
-    volumes:
-      - /:/rootfs:ro # access and collect resource usage data from the host's filesystem
-      - /var/run:/var/run:rw #allows CAdvisor to access and collect resource usage data from the host's running processes.
-      - /sys:/sys:ro #allows CAdvisor to access and collect resource usage data from the host's system information
-      - /var/lib/docker/:/var/lib/docker:ro # allows CAdvisor to access and collect resource usage data from the host's running Docker containers
-    ports:
-      - "8080:8080"
-    networks:
-      - appnwrk
-    restart: always

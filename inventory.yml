@@ -1,0 +1,11 @@
+all:
+  hosts:
+    yismaili-host:
+      ansible_host: 192.168.100.76
+      ansible_user: yismaili
+      docker_registry_url: "http://localhost:5000/v2/"
+      docker_registry_port: "5000:5000"
+      docker_username: "yismaili"
+      docker_password: "password"
+      image_tag: "inceotion"
+

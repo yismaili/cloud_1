@@ -1,0 +1,44 @@
+- name: Deploy WordPress with Ansible
+  hosts: yismaili-host
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Install Docker (if not already installed)
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Pull Docker registry image
+      docker_image:
+        name: registry
+        tag: latest
+        source: pull
+
+    - name: Run Docker registry container
+      docker_container:
+        name: my_registry
+        image: registry:latest
+        state: started
+        ports:
+          - "{{ docker_registry_port }}"
+
+    - name: Wait for Docker registry to be up and running
+      uri:
+        url: "{{ docker_registry_url }}"
+        return_content: yes
+      register: result
+
+    - name: Check if Docker registry is running
+      debug:
+        msg: "Docker registry is up and running" 
+      when: result.status == 200
+
+    - name: Login to Docker registry
+      docker_login:
+        username: "{{ docker_username }}"
+        password: "{{ docker_password }}"
+        registry: "{{ docker_registry_url | regex_replace('/v2/', '') }}"
+
+   
