@@ -1,12 +1,12 @@
-- name: Deploy WordPress with Ansible
+- name: Deploy WordPress with Ansible #atribut name (name of tasks)
   hosts: yismaili-host
   gather_facts: no
   become: yes
-
+# this play tasks should be executed which user hosts
   tasks:
-    - name: Install Docker (if not already installed)
-      apt:
-        name: docker.io
+    - name: Install Docker (if not already installed) 
+       apt:                #module name 
+        name: docker.io   #arguments
         state: present
         update_cache: yes
 
