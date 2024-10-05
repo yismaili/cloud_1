@@ -1,0 +1,5 @@
+---
+- name: Run Docker Compose for building images and running containers
+  command: docker compose up -d --build
+  args:
+    chdir: "{{ docker_compose_path }}"

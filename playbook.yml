@@ -1,0 +1,26 @@
+---
+- name: Setup and Deploy WordPress on yismaili-host
+  hosts: yismaili_host
+  gather_facts: no
+  become: yes
+
+  roles:
+    # VM Configuration
+    - remove_conflicting_containerd
+    - install_required_packages
+    - configure_docker_logging
+    - add_user_to_docker_group
+    
+    # WordPress Deployment
+    - copy_src
+    - create_directories
+    - docker_registry
+    - docker_images
+    - docker_compose
+
+  handlers:
+    - name: Restart Docker
+      become: yes
+      service:
+        name: docker
+        state: restarted

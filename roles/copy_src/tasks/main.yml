@@ -1,0 +1,5 @@
+---
+- name: Copy src directory to /home
+  copy:
+    src: /home/yoyo/Desktop/cloud_1/src
+    dest: /home/

@@ -1,0 +1,6 @@
+---
+- name: Remove conflicting containerd if installed
+  apt:
+    name: containerd
+    state: absent
+  ignore_errors: yes

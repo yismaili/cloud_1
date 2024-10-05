@@ -1,0 +1,13 @@
+---
+- name: Configure Docker logging
+  copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "100m"
+        }
+      }
+    mode: '0644'
+  notify: Restart Docker

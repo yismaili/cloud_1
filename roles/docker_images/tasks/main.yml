@@ -1,0 +1,27 @@
+---
+- name: Build and push MariaDB Docker image
+  docker_image:
+    build:
+      path: "{{ image_build_path_mariadb }}"
+    name: "localhost:5000/{{ image_mariadb }}"
+    tag: "{{ image_tag }}"
+    push: yes
+    source: build
+
+- name: Build and push WordPress Docker image
+  docker_image:
+    build:
+      path: "{{ image_build_path_wordpress }}"
+    name: "localhost:5000/{{ image_wordpress }}"
+    tag: "{{ image_tag }}"
+    push: yes
+    source: build
+
+- name: Build and push Nginx Docker image
+  docker_image:
+    build:
+      path: "{{ image_build_path_nginx }}"
+    name: "localhost:5000/{{ image_nginx }}"
+    tag: "{{ image_tag }}"
+    push: yes
+    source: build
