@@ -1,21 +1,30 @@
-- name: Deploy WordPress with Ansible #atribut name (name of tasks)
+---
+- name: Deploy WordPress with Ansible
   hosts: yismaili-host
   gather_facts: no
   become: yes
-# this play tasks should be executed which user hosts
-  tasks:
-    - name: Install Docker (if not already installed) 
-       apt:                #module name 
-        name: docker.io   #arguments
-        state: present
-        update_cache: yes
 
+  tasks:
+    - name: Copy src directory to /home
+      copy:
+        src: /home/yoyo/Desktop/cloud_1/src
+        dest: /home/
+    
+    - name: Create directories for MariaDB and WordPress
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - /home/data/mariadb
+        - /home/data/wordpress
+    
     - name: Pull Docker registry image
       docker_image:
         name: registry
         tag: latest
         source: pull
-
+    
     - name: Run Docker registry container
       docker_container:
         name: my_registry
@@ -23,68 +32,47 @@
         state: started
         ports:
           - "{{ docker_registry_port }}"
-
+    
     - name: Wait for Docker registry to be up and running
       uri:
         url: "{{ docker_registry_url }}"
         return_content: yes
       register: result
-
+    
     - name: Check if Docker registry is running
       debug:
-        msg: "Docker registry is up and running" 
+        msg: "Docker registry is up and running"
       when: result.status == 200
-
-    - name: Login to Docker registry
-      docker_login:
-        username: "{{ docker_username }}"
-        password: "{{ docker_password }}"
-        registry: "{{ docker_registry_url | regex_replace('/v2/', '') }}"
-
-    - name: Build MariaDB Docker image
+    
+    - name: Build and push MariaDB Docker image
       docker_image:
-        path: "{{ image_build_path_mariadb }}"
-        name: "localhost:5000/{{ image_mariadb }}"
-        tag: "{{ image_tag }}"
-
-    - name: Push MariaDB Docker image to registry
-      docker_image:
+        build:
+          path: "{{ image_build_path_mariadb }}"
         name: "localhost:5000/{{ image_mariadb }}"
         tag: "{{ image_tag }}"
         push: yes
-
-    - name: Build WordPress Docker image
+        source: build
+    
+    - name: Build and push WordPress Docker image
       docker_image:
-        path: "{{ image_build_path_wordpress }}"
-        name: "localhost:5000/{{ image_wordpress }}"
-        tag: "{{ image_tag }}"
-
-    - name: Push WordPress Docker image to registry
-      docker_image:
+        build:
+          path: "{{ image_build_path_wordpress }}"
         name: "localhost:5000/{{ image_wordpress }}"
         tag: "{{ image_tag }}"
         push: yes
-
-    - name: Build Nginx Docker image
+        source: build
+    
+    - name: Build and push Nginx Docker image
       docker_image:
-        path: "{{ image_build_path_nginx }}"
-        name: "localhost:5000/{{ image_nginx }}"
-        tag: "{{ image_tag }}"
-
-    - name: Push Nginx Docker image to registry
-      docker_image:
+        build:
+          path: "{{ image_build_path_nginx }}"
         name: "localhost:5000/{{ image_nginx }}"
         tag: "{{ image_tag }}"
         push: yes
-
-     - name: Run docker-compose up
-      community.docker.docker_compose:
-        project_src: {{ docker-compose_path }}
-        state: present
-        restarted: yes
-
-    - name: Ensure Docker Compose is running
-      command: docker-compose ps
+        source: build
+    
+    - name: Run Docker Compose for building images and running containers
+      become: yes
+      command: docker compose up -d --build
       args:
-        chdir: {{ docker-compose_path }}
-      register: compose_ps
+        chdir: "{{ docker_compose_path }}"

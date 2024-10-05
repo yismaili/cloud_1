@@ -1,0 +1,63 @@
+version: "2"
+
+services: 
+  mariadb:
+    container_name: mariadb
+    env_file:
+      - .env
+    ports:
+      - 3360:3306
+    image: localhost:5000/mariadb:latest 
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - appnwrk
+
+  wordpress:
+    container_name: wordpress
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+    image: localhost:5000/wordpress:latest 
+    restart: always
+    ports:
+      - 9000:9000
+    volumes:
+      - wp:/var/www/html
+    networks:
+      - appnwrk
+
+  nginx:
+    container_name: nginx
+    env_file:
+      - .env
+    depends_on:
+      - wordpress
+    image: localhost:5000/nginx:latest  
+    restart: always
+    ports: 
+      - 443:443
+    volumes:
+      - wp:/var/www/html
+    networks:
+      - appnwrk
+ 
+volumes:
+  db:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/data/mariadb
+  wp:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/data/wordpress
+
+networks:
+  appnwrk:
+    driver: bridge

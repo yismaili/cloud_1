@@ -1,14 +1,22 @@
 - name: Configuration of the VM with Ansible
-  hosts: all
+  hosts: yismaili-host
   gather_facts: no
 
   tasks:
+    - name: Remove conflicting containerd if installed
+      become: yes
+      apt:
+        name: containerd
+        state: absent
+      ignore_errors: yes 
+
     - name: Install required packages
       become: yes
       apt:
         name:
           - docker.io
           - docker-compose
+          - python3-pip
         state: present
         update_cache: yes
 
@@ -17,7 +25,7 @@
       copy:
         dest: /etc/docker/daemon.json
         content: |
-          {4
+          {
             "log-driver": "json-file",
             "log-opts": {
               "max-size": "100m"
@@ -32,3 +40,10 @@
         name: "{{ ansible_user }}"
         groups: docker
         append: yes
+
+  handlers:
+    - name: Restart Docker
+      become: yes
+      service:
+        name: docker
+        state: restarted
